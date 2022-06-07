@@ -1,0 +1,10 @@
+imu_zupt:
+  ros__parameters:
+    source_topic:
+      locomotion_topic: /locomotion/odom
+      imu_topic: /imu/data
+    dest_topic: /imu/data_zupt
+    err_topic: /imu/yaw_err
+    publish_err: false
+    use_degree: false
+    pub_covariance: true
