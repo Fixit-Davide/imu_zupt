@@ -3,70 +3,80 @@
 #include "imu_zupt/imu_zupt.hpp"
 
 using std::placeholders::_1;
-#define COV 0.0010000000474974513
 
 namespace filter{    
 
     ImuZupt::ImuZupt(const rclcpp::NodeOptions & options) : Node("imu_zupt", options) {
 
-        source_topic_odom = declare_parameter<std::string>("source_topic.locomotion_topic", "/locomotion/odom");
-        source_topic_imu = declare_parameter<std::string>("source_topic.imu_topic", "/imu/data");
-        dest_topic = declare_parameter<std::string>("dest_topic", "/imu/data_zupt");
-        err_topic = declare_parameter<std::string>("err_topic", "/imu/yaw_err");
-        publish_err = declare_parameter<bool>("publish_err", true);
-        use_degree = declare_parameter<bool>("use_degree", true);
-        covariance_pub = declare_parameter<bool>("pub_covariance", true);
-        
+        source_topic_odom = declare_parameter<std::string>("topics.locomotion", "/locomotion/odom");
+        source_topic_imu = declare_parameter<std::string>("topics.imu", "/imu/data");
+        dest_topic = declare_parameter<std::string>("topics.output", "/imu/data_zupt");
+        err_topic = declare_parameter<std::string>("topics.error", "/imu/yaw_err");
+        status_topic = declare_parameter<std::string>("topics.zero_velocity_detected", "/imu_zupt/active");
+        publish_err = declare_parameter<bool>("error.publish", true);
+        use_degree = declare_parameter<bool>("error.in_degrees", true);
+        override_covariance = declare_parameter<bool>("covariance.override", true);
+        covariance = declare_parameter<double>("covariance.value", 0.001);
+        publish_status = declare_parameter<bool>("zero_velocity_detection.publish", true);
+        wait_time = declare_parameter<double>("zero_velocity_detection.seconds", 2.0);
+
         loco_subs_ = create_subscription<nav_msgs::msg::Odometry>(source_topic_odom, 1, std::bind(&ImuZupt::loco_callback, this, _1));
         imu_subs_ =  create_subscription<sensor_msgs::msg::Imu>(source_topic_imu, 1, std::bind(&ImuZupt::imu_callback, this, _1));
-        publisher_ = create_publisher<sensor_msgs::msg::Imu>(dest_topic, 1);
-        err_ = create_publisher<std_msgs::msg::Float64>(err_topic, 1);
+        zupt_publ_ = create_publisher<sensor_msgs::msg::Imu>(dest_topic, 1);
+        err_publ_ = create_publisher<std_msgs::msg::Float64>(err_topic, 1);
+        status_publ_ = create_publisher<std_msgs::msg::Bool>(status_topic, 1);
     }
 
     void ImuZupt::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg)
     {
         if (!active) return;
-        sensor_msgs::msg::Imu msg = *imu_msg;
-        std_msgs::msg::Float64 errore_yaw;
-        tf2::fromMsg(msg.orientation,q);
-        prev_time = msg.header.stamp;
-        auto header = msg.header;
-        tf2::Matrix3x3 m(q);
+    	std::unique_ptr<sensor_msgs::msg::Imu> pkt_imu_zupt(new sensor_msgs::msg::Imu);
+        pkt_imu_zupt->header = imu_msg->header;
+
+        tf2::fromMsg(imu_msg->orientation, q1);
+        tf2::Matrix3x3 m(q1);
         m.getRPY(last_roll, last_pitch, last_yaw);
-        if((prev_time.seconds() - time_stamp.seconds()) > 1.0) {
+
+        zero_velocity_detected = (rclcpp::Time(imu_msg->header.stamp).seconds() - last_motion_time.seconds()) > wait_time;
+        if(zero_velocity_detected) {
             yaw_error += last_yaw - prev_yaw;
         }
-        last_valid.setRPY(last_roll, last_pitch, last_yaw - yaw_error);
-        msg.orientation = tf2::toMsg(last_valid);
+
+        q2.setRPY(last_roll, last_pitch, last_yaw - yaw_error);
+        pkt_imu_zupt->orientation = tf2::toMsg(q2);
         prev_yaw = last_yaw;
-        if(use_degree){
-            errore_yaw.data = yaw_error * 180 / M_PI;
-        } else {
-            errore_yaw.data = yaw_error;
+
+        if(override_covariance){
+            pkt_imu_zupt->orientation_covariance[0] = covariance;
+            pkt_imu_zupt->orientation_covariance[4] = covariance;
+            pkt_imu_zupt->orientation_covariance[8] = covariance;
         }
-        if(covariance_pub){
-            msg.orientation_covariance[0] = COV;
-            msg.orientation_covariance[4] = COV;
-            msg.orientation_covariance[8] = COV;
-        }
-        msg.header = header;
-        publisher_->publish(msg);
+
+        zupt_publ_->publish(std::move(pkt_imu_zupt));
+
         if(publish_err){
-            err_->publish(errore_yaw);
+            std::unique_ptr<std_msgs::msg::Float64> errore_yaw(new std_msgs::msg::Float64);
+            errore_yaw->data = yaw_error;
+            if(use_degree){
+                errore_yaw->data *=  180 / M_PI;
+            }
+            err_publ_->publish(std::move(errore_yaw));
+        }
+        
+        if(publish_status){
+            std::unique_ptr<std_msgs::msg::Bool> active_msg(new std_msgs::msg::Bool);
+            active_msg->data = zero_velocity_detected;
+            status_publ_->publish(std::move(active_msg));
         }
     }
 
     void ImuZupt::loco_callback(const nav_msgs::msg::Odometry::SharedPtr loco_msg)
     {
-        if(std::abs(loco_msg->twist.twist.linear.x) > 1e-3 || std::abs(loco_msg->twist.twist.angular.z) > 1e-3){
-            time_stamp = loco_msg->header.stamp;
+        if(std::abs(loco_msg->twist.twist.linear.x) != 0.0 || std::abs(loco_msg->twist.twist.angular.z) != 0.0){
+            last_motion_time = loco_msg->header.stamp;
         }
         active = true;
     }
-
-
-
-ImuZupt::~ImuZupt(){}
   
 } //namespace filter
 

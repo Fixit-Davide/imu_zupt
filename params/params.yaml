@@ -1,10 +1,17 @@
 imu_zupt:
   ros__parameters:
-    source_topic:
-      locomotion_topic: /locomotion/odom
-      imu_topic: /imu/data
-    dest_topic: /imu/data_zupt
-    err_topic: /imu/yaw_err
-    publish_err: false
-    use_degree: false
-    pub_covariance: true
+    topics:
+      locomotion: /locomotion/odom
+      imu: /imu/data
+      output: /imu/data_zupt
+      error: /imu/yaw_err
+      status: /imu_zupt/active
+    covariance:
+      override: true
+      value: 0.001
+    error:
+      publish: true
+      in_degrees: true
+    zero_velocity_detection:
+      seconds: 2.0
+      publish: true
