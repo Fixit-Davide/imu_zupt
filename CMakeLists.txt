@@ -29,13 +29,14 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 include_directories(
   include
 )
 
 add_library(imu_zupt SHARED src/imu_zupt.cpp)
-ament_target_dependencies(imu_zupt rclcpp rcutils std_msgs sensor_msgs nav_msgs geometry_msgs)
+ament_target_dependencies(imu_zupt rclcpp rcutils rclcpp_components std_msgs sensor_msgs nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 rclcpp_components_register_node(
   imu_zupt
