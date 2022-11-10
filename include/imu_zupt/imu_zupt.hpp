@@ -7,7 +7,6 @@
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/convert.h>
 #include <tf2/impl/utils.h>
-#include "nav_msgs/msg/odometry.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "std_msgs/msg/float64.hpp"
 #include "std_msgs/msg/bool.hpp"
@@ -22,29 +21,27 @@ namespace filter {
         ~ImuZupt(){};
 
         private:
-        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr loco_subs_;
         rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subs_;
         rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr zupt_publ_;
         rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr err_publ_;
         rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr status_publ_;
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr rover_status_subs_;
 
         void imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg);
-        void loco_callback(const nav_msgs::msg::Odometry::SharedPtr loco_msg);
+        void status_callback(const std_msgs::msg::Bool::SharedPtr status_msg);
 
-        rclcpp::Time last_motion_time;
         tf2::Quaternion q1 = {0,0,0,1};
         tf2::Quaternion q2 = {0,0,0,1};
         double last_roll, last_pitch, last_yaw;
         double yaw_error = 0;
         double prev_yaw = 0;
         bool active = false;
-        bool zero_velocity_detected = false;
 
         std::string source_topic_imu;
-        std::string source_topic_odom;
         std::string dest_topic;
         std::string err_topic;
         std::string status_topic;
+        std::string rover_status_topic; 
         bool publish_status;
         bool publish_err;
         bool use_degree;

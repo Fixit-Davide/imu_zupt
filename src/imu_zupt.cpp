@@ -9,7 +9,6 @@ namespace filter{
 
     ImuZupt::ImuZupt(const rclcpp::NodeOptions & options) : Node("imu_zupt", options) {
 
-        source_topic_odom = declare_parameter<std::string>("topics.locomotion", "/locomotion/odom");
         source_topic_imu = declare_parameter<std::string>("topics.imu", "/imu/data");
         dest_topic = declare_parameter<std::string>("topics.output", "/imu/data_zupt");
         err_topic = declare_parameter<std::string>("topics.error", "/imu/yaw_err");
@@ -19,9 +18,9 @@ namespace filter{
         override_covariance = declare_parameter<bool>("covariance.override", true);
         covariance = declare_parameter<double>("covariance.value", 0.001);
         publish_status = declare_parameter<bool>("zero_velocity_detection.publish", true);
-        wait_time = declare_parameter<double>("zero_velocity_detection.seconds", 2.0);
+        rover_status_topic = declare_parameter<std::string>("topics.rover_status", "/rover_status");
 
-        loco_subs_ = create_subscription<nav_msgs::msg::Odometry>(source_topic_odom, 1, std::bind(&ImuZupt::loco_callback, this, _1));
+        rover_status_subs_ = create_subscription<std_msgs::msg::Bool>(rover_status_topic, 1, std::bind(&ImuZupt::status_callback, this, _1));
         imu_subs_ =  create_subscription<sensor_msgs::msg::Imu>(source_topic_imu, 1, std::bind(&ImuZupt::imu_callback, this, _1));
         zupt_publ_ = create_publisher<sensor_msgs::msg::Imu>(dest_topic, 1);
         err_publ_ = create_publisher<std_msgs::msg::Float64>(err_topic, 1);
@@ -38,10 +37,7 @@ namespace filter{
         tf2::Matrix3x3 m(q1);
         m.getRPY(last_roll, last_pitch, last_yaw);
 
-        zero_velocity_detected = (rclcpp::Time(imu_msg->header.stamp).seconds() - last_motion_time.seconds()) > wait_time;
-        if(zero_velocity_detected) {
-            yaw_error += last_yaw - prev_yaw;
-        }
+        yaw_error += last_yaw - prev_yaw;
 
         q2.setRPY(last_roll, last_pitch, last_yaw - yaw_error);
         pkt_imu_zupt->orientation = tf2::toMsg(q2);
@@ -66,17 +62,14 @@ namespace filter{
         
         if(publish_status){
             std::unique_ptr<std_msgs::msg::Bool> active_msg(new std_msgs::msg::Bool);
-            active_msg->data = zero_velocity_detected;
+            active_msg->data = active;
             status_publ_->publish(std::move(active_msg));
         }
     }
 
-    void ImuZupt::loco_callback(const nav_msgs::msg::Odometry::SharedPtr loco_msg)
+    void ImuZupt::status_callback(const std_msgs::msg::Bool::SharedPtr status_msg)
     {
-        if(std::abs(loco_msg->twist.twist.linear.x) != 0.0 || std::abs(loco_msg->twist.twist.angular.z) != 0.0){
-            last_motion_time = loco_msg->header.stamp;
-        }
-        active = true;
+        active = status_msg->data;
     }
   
 } //namespace filter
