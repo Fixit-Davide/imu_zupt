@@ -2,12 +2,11 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>imu_zupt</name>
-  <version>0.0.0</version>
-  <description>ZUPT algorithm for SINAV</description>
-  <author email="dgraziato10@gmail.com">davide</author>
-  <maintainer email="dgraziato10@gmail.com">davide</maintainer>
-  <maintainer email="roncapat@gmail.com">Patrick Roncagliolo</maintainer>
-  <license>GPLv3</license>
+  <version>0.0.2</version>
+  <description>Launchers for RoXY AutoNav - Workstation</description>
+  <author email="graziato.davide@outlook.it">Davide Graziato</author>
+  <maintainer email="graziato.davide@outlook.it">Davide Graziato</maintainer>
+  <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
    
