@@ -3,9 +3,10 @@
 <package format="3">
   <name>imu_zupt</name>
   <version>0.0.2</version>
-  <description>Launchers for RoXY AutoNav - Workstation</description>
+  <description>Zero Update Velocity Algorithm for ROS 2 Imu sensor (yaw/heading)</description>
   <author email="graziato.davide@outlook.it">Davide Graziato</author>
   <maintainer email="graziato.davide@outlook.it">Davide Graziato</maintainer>
+  <maintainer email="ronca.pat@gmail.com">Patrick Roncagliolo</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
