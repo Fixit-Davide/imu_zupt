@@ -1,7 +1,7 @@
 # Zero-Velocity Update Algorithm: (ZUPT)
 
-[![Ubuntu 22.04 Iron Build](https://github.com/roncapat/imu_zupt/actions/workflows/iron.yaml/badge.svg?branch=iron)](https://github.com/roncapat/imu_zupt/actions/workflows/iron.yaml)
-[![Ubuntu 22.04 Rolling Build](https://github.com/roncapat/imu_zupt/actions/workflows/rolling.yaml/badge.svg?branch=iron)](https://github.com/roncapat/imu_zupt/actions/workflows/rolling.yaml)
+[![Ubuntu 22.04 Iron Build](https://github.com/Fixit-Davide/imu_zupt/actions/workflows/iron.yaml/badge.svg?branch=iron)](https://github.com/Fixit-Davide/imu_zupt/actions/workflows/iron.yaml)
+[![Ubuntu 22.04 Rolling Build](https://github.com/Fixit-Davide/imu_zupt/actions/workflows/rolling.yaml/badge.svg?branch=iron)](https://github.com/Fixit-Davide/imu_zupt/actions/workflows/rolling.yaml)
 
 A simple Zero-velocity update algorithm which provides accurate state information in order to maintain the reliability of the measurements incoming from the inertial navigation system once the stationary conditions are satisfied.
 The cumulative error while stationary due to the movement of the Earth on the Yaw angle is estimated mathematically and subsequently removed. The filtered measurements are then published through a ROS topic.
