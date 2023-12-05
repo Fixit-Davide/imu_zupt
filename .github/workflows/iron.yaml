@@ -1,0 +1,39 @@
+name: Ubuntu 22.04 Iron Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - iron
+
+jobs:
+  Build:
+    runs-on: self-hosted
+    container:
+      image: osrf/ros:iron-desktop-full-jammy
+
+    steps:
+    - name: Update
+      run: apt update
+
+    - name: Install PIP
+      run: apt install -y python3-pip lcov
+
+    - name: Install colcon tools
+      run: python3 -m pip install colcon-lcov-result colcon-coveragepy-result
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Run Tests
+      uses: ros-tooling/action-ros-ci@0.3.5
+      with:
+        target-ros2-distro: iron
+        import-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Logs
+      uses: actions/upload-artifact@v1
+      with:
+        name: colcon-logs
+        path: ros_ws/log
+      if: always()
