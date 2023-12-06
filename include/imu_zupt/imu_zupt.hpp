@@ -11,44 +11,45 @@
 #include "std_msgs/msg/float64.hpp"
 #include "std_msgs/msg/bool.hpp"
 
-namespace filter {
+namespace filter
+{
 
-    class ImuZupt : public rclcpp::Node {
-        public:
-        
-        ImuZupt(const rclcpp::NodeOptions & options);
-        
-        ~ImuZupt(){};
+class ImuZupt : public rclcpp::Node
+{
+public:
+  ImuZupt(const rclcpp::NodeOptions & options);
 
-        private:
-        rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subs_;
-        rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr zupt_publ_;
-        rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr err_publ_;
-        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr status_publ_;
-        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr rover_status_subs_;
+  ~ImuZupt() {}
 
-        void imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg);
-        void status_callback(const std_msgs::msg::Bool::SharedPtr status_msg);
+private:
+  rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_subs_;
+  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr zupt_publ_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr err_publ_;
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr status_publ_;
+  rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr rover_status_subs_;
 
-        tf2::Quaternion q1 = {0,0,0,1};
-        tf2::Quaternion q2 = {0,0,0,1};
-        double last_roll, last_pitch, last_yaw;
-        double yaw_error = 0;
-        double prev_yaw = 0;
-        bool active = false;
+  void imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg);
+  void status_callback(const std_msgs::msg::Bool::SharedPtr status_msg);
 
-        std::string source_topic_imu;
-        std::string dest_topic;
-        std::string err_topic;
-        std::string status_topic;
-        std::string rover_status_topic; 
-        bool publish_status;
-        bool publish_err;
-        bool use_degree;
-        bool override_covariance;
-        double wait_time;
-        double covariance;
-    };
+  tf2::Quaternion q1 = {0, 0, 0, 1};
+  tf2::Quaternion q2 = {0, 0, 0, 1};
+  double last_roll, last_pitch, last_yaw;
+  double yaw_error = 0;
+  double prev_yaw = 0;
+  bool active = false;
+
+  std::string source_topic_imu;
+  std::string dest_topic;
+  std::string err_topic;
+  std::string status_topic;
+  std::string rover_status_topic;
+  bool publish_status;
+  bool publish_err;
+  bool use_degree;
+  bool override_covariance;
+  double wait_time;
+  double covariance;
+};
 } //namespace filter
 
 #include "rclcpp_components/register_node_macro.hpp"
