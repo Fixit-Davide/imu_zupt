@@ -1,7 +1,8 @@
-#include <chrono>
-#include <cmath>
+/*
+Copyright 2023 Thales Alenia Space
+*/
+
 #include "imu_zupt/imu_zupt.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 using std::placeholders::_1;
 
@@ -11,7 +12,6 @@ namespace filter
 ImuZupt::ImuZupt(const rclcpp::NodeOptions & options)
 : Node("imu_zupt", options)
 {
-
   source_topic_imu = declare_parameter<std::string>("topics.imu", "/imu/data");
   dest_topic = declare_parameter<std::string>("topics.output", "/imu/data_zupt");
   err_topic = declare_parameter<std::string>("topics.error", "/imu/yaw_err");
@@ -82,4 +82,4 @@ void ImuZupt::status_callback(const std_msgs::msg::Bool::SharedPtr status_msg)
   active = status_msg->data;
 }
 
-} //namespace filter
+}  // namespace filter
