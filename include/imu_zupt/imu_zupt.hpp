@@ -1,15 +1,25 @@
-#ifndef ROS2__IMU_ZUPT
-#define ROS2__IMU_ZUPT
+/*
+Copyright 2023 Thales Alenia Space
+*/
 
-#include <rclcpp/rclcpp.hpp>
+#ifndef IMU_ZUPT__IMU_ZUPT_HPP_
+#define IMU_ZUPT__IMU_ZUPT_HPP_
+
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/convert.h>
 #include <tf2/impl/utils.h>
-#include "sensor_msgs/msg/imu.hpp"
-#include "std_msgs/msg/float64.hpp"
-#include "std_msgs/msg/bool.hpp"
+
+#include <chrono>
+#include <cmath>
+#include <string>
+#include <rclcpp/rclcpp.hpp>
+
+#include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <sensor_msgs/msg/imu.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 namespace filter
 {
@@ -17,7 +27,7 @@ namespace filter
 class ImuZupt : public rclcpp::Node
 {
 public:
-  ImuZupt(const rclcpp::NodeOptions & options);
+  explicit ImuZupt(const rclcpp::NodeOptions & options);
 
   ~ImuZupt() {}
 
@@ -50,7 +60,7 @@ private:
   double wait_time;
   double covariance;
 };
-} //namespace filter
+}  // namespace filter
 
 #include "rclcpp_components/register_node_macro.hpp"
 
@@ -59,4 +69,4 @@ private:
 // is being loaded into a running process.
 RCLCPP_COMPONENTS_REGISTER_NODE(filter::ImuZupt)
 
-#endif //ROS2__IMU_ZUPT
+#endif  // IMU_ZUPT__IMU_ZUPT_HPP_
