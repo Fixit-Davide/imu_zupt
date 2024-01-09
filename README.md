@@ -8,8 +8,8 @@ The cumulative error while stationary due to the movement of the Earth on the Ya
 
 ## Parametrization:
 - topics:
-    - locomotion: Input topic for the Locomotion data. (nav_msgs::msg::Odometry)
     - imu: Input topic for the IMU data. (sensor_msgs::msg::Imu)
+    - rover_status: Input topic for the system's status. (std_msgs::msg::Bool)
     - output: output topic for the filtered measurements. (sensor_msgs::msg::Imu)
 - zero_velocity_detection: 
     - seconds: time frame (in sec) which the algorithm will wait to establish if the stationary conditions are met. (double) 
