@@ -51,8 +51,8 @@ private:
   std::string source_topic_imu;
   std::string dest_topic;
   std::string err_topic;
-  std::string status_topic;
-  std::string rover_status_topic;
+  std::string filter_status_topic;
+  std::string input_status_topic;
   bool publish_status;
   bool publish_err;
   bool use_degree;

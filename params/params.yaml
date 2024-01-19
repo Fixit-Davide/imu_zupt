@@ -1,11 +1,11 @@
 imu_zupt:
   ros__parameters:
     topics:
-      locomotion: /locomotion/odom
       imu: /imu/data
       output: /imu/data_zupt
       error: /imu/yaw_err
-      status: /imu_zupt/active
+      filter_status: /imu_zupt/active
+      input_status: /input_status
     covariance:
       override: true
       value: 0.001

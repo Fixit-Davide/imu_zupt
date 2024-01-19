@@ -15,18 +15,18 @@ ImuZupt::ImuZupt(const rclcpp::NodeOptions & options)
   source_topic_imu = declare_parameter<std::string>("topics.imu", "/imu/data");
   dest_topic = declare_parameter<std::string>("topics.output", "/imu/data_zupt");
   err_topic = declare_parameter<std::string>("topics.error", "/imu/yaw_err");
-  status_topic =
-    declare_parameter<std::string>("topics.zero_velocity_detected", "/imu_zupt/active");
+  filter_status_topic =
+    declare_parameter<std::string>("topics.filter_status", "/imu_zupt/active");
   publish_err = declare_parameter<bool>("error.publish", true);
   use_degree = declare_parameter<bool>("error.in_degrees", true);
   override_covariance = declare_parameter<bool>("covariance.override", true);
   covariance = declare_parameter<double>("covariance.value", 0.001);
   publish_status = declare_parameter<bool>("zero_velocity_detection.publish", true);
-  rover_status_topic = declare_parameter<std::string>("topics.rover_status", "/rover_status");
+  input_status_topic = declare_parameter<std::string>("topics.input_status", "/input_status");
 
   rover_status_subs_ =
     create_subscription<std_msgs::msg::Bool>(
-    rover_status_topic, 1,
+    input_status_topic, 1,
     std::bind(&ImuZupt::status_callback, this, _1));
   imu_subs_ =
     create_subscription<sensor_msgs::msg::Imu>(
@@ -34,14 +34,14 @@ ImuZupt::ImuZupt(const rclcpp::NodeOptions & options)
     std::bind(&ImuZupt::imu_callback, this, _1));
   zupt_publ_ = create_publisher<sensor_msgs::msg::Imu>(dest_topic, 1);
   err_publ_ = create_publisher<std_msgs::msg::Float64>(err_topic, 1);
-  status_publ_ = create_publisher<std_msgs::msg::Bool>(status_topic, 1);
+  status_publ_ = create_publisher<std_msgs::msg::Bool>(filter_status_topic, 1);
 }
 
 void ImuZupt::imu_callback(const sensor_msgs::msg::Imu::SharedPtr imu_msg)
 {
   if (!active) {return;}
   std::unique_ptr<sensor_msgs::msg::Imu> pkt_imu_zupt(new sensor_msgs::msg::Imu);
-  pkt_imu_zupt->header = imu_msg->header;
+  *pkt_imu_zupt = *imu_msg;
 
   tf2::fromMsg(imu_msg->orientation, q1);
   tf2::Matrix3x3 m(q1);
