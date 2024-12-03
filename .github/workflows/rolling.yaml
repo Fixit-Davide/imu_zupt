@@ -10,23 +10,18 @@ jobs:
   Build:
     runs-on: self-hosted
     container:
-      image: osrf/ros:rolling-desktop-full-jammy
+      image: osrf/ros:rolling-desktop-full
 
     steps:
-    - name: Update
-      run: apt update
-
-    - name: Install PIP
-      run: apt install -y python3-pip lcov
-
-    - name: Install colcon tools
-      run: python3 -m pip install colcon-lcov-result colcon-coveragepy-result
+    - name: Install Pip
+      timeout-minutes: 2
+      run: sudo apt-get update && sudo apt-get install -y lcov python3-pip python3-colcon-lcov-result python3-colcon-coveragepy-result
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Run Tests
-      uses: ros-tooling/action-ros-ci@0.3.5
+      uses: ros-tooling/action-ros-ci@0.3.15
       with:
         target-ros2-distro: rolling
         import-token: ${{ secrets.GITHUB_TOKEN }}
