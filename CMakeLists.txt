@@ -1,12 +1,7 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 project(imu_zupt)
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
-
-# Default to C++17
+# Default to C++20
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 20)
 endif()
@@ -30,34 +25,79 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 
-include_directories(
-  include
+
+add_library(imu_zupt_node SHARED src/imu_zupt.cpp)
+target_link_libraries(imu_zupt_node PUBLIC
+  rclcpp::rclcpp
+  rcutils::rcutils
+  rclcpp_components::component
+  ${std_msgs_TARGETS}
+  ${sensor_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_geometry_msgs::tf2_geometry_msgs
 )
 
-add_library(imu_zupt SHARED src/imu_zupt.cpp)
-ament_target_dependencies(imu_zupt rclcpp rcutils rclcpp_components std_msgs sensor_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+target_include_directories(imu_zupt_node PRIVATE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include>"
+)
+
+add_library(
+  imu_zupt
+  SHARED
+  src/component.cpp
+)
+
+target_include_directories(
+  imu_zupt
+  PRIVATE
+  include
+)
+target_link_libraries(
+  imu_zupt
+  imu_zupt_node
+  rclcpp_components::component
+)
 
 rclcpp_components_register_node(
   imu_zupt
   PLUGIN "filter::ImuZupt"
   EXECUTABLE ImuZuptExecutable)
 
-install(TARGETS imu_zupt
+install(TARGETS imu_zupt imu_zupt_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
 
-# Install launch files.
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
 install(DIRECTORY
   params
   DESTINATION share/${PROJECT_NAME}/
 )
 
-# Install launch files.
 install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}/
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  rclcpp
+  rcutils
+  rclcpp_components
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
 )
 
 if(BUILD_TESTING)
