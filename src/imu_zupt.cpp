@@ -1,7 +1,3 @@
-/*
-Copyright 2023 Thales Alenia Space
-*/
-
 #include "imu_zupt/imu_zupt.hpp"
 
 using std::placeholders::_1;

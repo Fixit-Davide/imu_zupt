@@ -1,15 +1,11 @@
-/*
-Copyright 2023 Thales Alenia Space
-*/
-
 #ifndef IMU_ZUPT__IMU_ZUPT_HPP_
 #define IMU_ZUPT__IMU_ZUPT_HPP_
 
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Matrix3x3.h>
-#include <tf2/LinearMath/Transform.h>
-#include <tf2/convert.h>
-#include <tf2/impl/utils.h>
+#include <tf2/LinearMath/Quaternion.hpp>
+#include <tf2/LinearMath/Matrix3x3.hpp>
+#include <tf2/LinearMath/Transform.hpp>
+#include <tf2/convert.hpp>
+#include <tf2/impl/utils.hpp>
 
 #include <chrono>
 #include <cmath>
@@ -61,12 +57,5 @@ private:
   double covariance;
 };
 }  // namespace filter
-
-#include "rclcpp_components/register_node_macro.hpp"
-
-// Register the component with class_loader.
-// This acts as a sort of entry point, allowing the component to be discoverable when its library
-// is being loaded into a running process.
-RCLCPP_COMPONENTS_REGISTER_NODE(filter::ImuZupt)
 
 #endif  // IMU_ZUPT__IMU_ZUPT_HPP_
